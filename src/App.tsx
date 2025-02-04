@@ -1,7 +1,8 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import './App.css'
-import { onNaverLogin, getData } from './utils/utils';
 import Signup from './pages/Signup';
+import LoginModal from './pages/LoginModal.tsx';
+import MainPage from './pages/MainPage.tsx';
 
 
 function App() {
@@ -10,18 +11,12 @@ function App() {
     return (
         <Router>
             <Routes>
-                <Route path="/" element={<Home />} />
+                <Route path="/" element={<MainPage />} />
+                {/*<Route path="/login" element={<LoginModal />} />*/}
                 <Route path="/signup" element={<Signup />} />
             </Routes>
         </Router>
     );
 }
-
-const Home = () => (
-    <>
-        <button onClick={onNaverLogin}>NAVER LOGIN</button>
-        <button onClick={getData}>GET DATA</button>
-    </>
-);
 
 export default App

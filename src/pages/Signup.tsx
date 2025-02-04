@@ -1,10 +1,31 @@
-import {useState, useEffect} from 'react';
-import jwt_decode from 'jwt-decode';
+import {useState, useEffect, ChangeEvent, FormEvent} from 'react';
+import {jwtDecode as jwt_decode} from 'jwt-decode';
 import '../App.css';
+import {API_URL} from "../config.ts";
+
+// 폼 데이터 타입 정의
+interface FormData {
+    email: string;
+    name: string;
+    socialType: string;
+    socialId: string;
+    userId: string;
+    profileName: string;
+    intro: string;
+    code: string;
+}
+
+// JWT 디코딩 결과 타입 정의
+interface DecodedToken {
+    email: string;
+    name: string;
+    socialType: string;
+    socialId: string;
+}
 
 
 const Signup = () => {
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<FormData>({
         email: '',
         name: '',
         socialType: '',
@@ -15,6 +36,8 @@ const Signup = () => {
         code: '',
     });
 
+    const [emailFromApi, setEmailFromApi] = useState<string | null>(null);
+
     // URL에서 쿼리 파라미터의 token을 추출하고 JWT 토큰에서 필요한 데이터 파싱
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
@@ -24,7 +47,7 @@ const Signup = () => {
         if (token) {
             try {
                 // JWT 토큰 디코딩
-                const decoded = jwt_decode(token);
+                const decoded = jwt_decode<DecodedToken>(token);
                 setFormData({
                     email: decoded.email,
                     name: decoded.name,
@@ -40,22 +63,24 @@ const Signup = () => {
                 alert('토큰 파싱 실패');
             }
         } else if (code) {
-            // code가 있는 경우에 대한 처리
-            setFormData({
-                email: '',
-                name: '',
-                socialType: '',
-                socialId: '',
-                userId: '',
-                profileName: '',
-                intro: '',
-                code: code,
-            });
+            // code가 있는 경우, 이메일을 API에서 조회하여 상태에 저장
+            fetch(`${API_URL}/v1/api/user/signup/verify-email?code=${code}`)
+                .then((response) => response.json())
+                .then((data) => {
+                    setEmailFromApi(data.email);
+                    setFormData((prev) => ({
+                        ...prev,
+                        code: code,
+                    }));
+                })
+                .catch(error => {
+                    console.error('이메일 조회 실패:', error);
+                });
         }
     }, []);
 
     // 입력 값 변경 처리
-    const handleChange = (e) => {
+    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         const {name, value} = e.target;
         setFormData((prev) => ({
             ...prev,
@@ -64,18 +89,40 @@ const Signup = () => {
     };
 
     // 폼 제출
-    const handleSubmit = (e) => {
+    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        console.log(formData);
 
-        fetch('http://localhost:8080/v1/api/user/signup', {
+        const formDataWithEmail = {
+            ...formData,
+            email: emailFromApi || formData.email,
+        };
+
+        console.log(formDataWithEmail);
+
+        fetch(`${API_URL}/v1/api/user/signup`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(formData),
+            body: JSON.stringify(formDataWithEmail),
         })
-            .then((res) => res.json())
+            .then((res) => {
+                if (!res.ok) {
+                    return Promise.reject('회원가입 실패');
+                }
+                return res.json();
+            })
             .then((data) => {
+                const token = data.token;
+
+                if (token) {
+                    localStorage.setItem('accessToken', token);
+                    console.log("회원가입 성공, 토큰 저장")
+                } else {
+                    console.warn("회원가입 성공, 토큰 반환되지 않음")
+                }
+
                 alert('회원가입 성공');
                 window.location.href = '/'; // 메인 페이지로 리다이렉트
             })
@@ -84,6 +131,7 @@ const Signup = () => {
                 alert('회원가입 실패');
             });
     };
+
 
     return (
         <div className="container">
@@ -106,7 +154,7 @@ const Signup = () => {
                     type="email"
                     id="email"
                     name="email"
-                    value={formData.email}
+                    value={emailFromApi || formData.email} // API에서 받은 이메일 사용
                     readOnly
                 />
 

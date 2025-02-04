@@ -1,11 +1,16 @@
 // src/utils/utils.ts
 
+
+import {API_URL} from "../config.ts";
+
 export const onNaverLogin = (): void => {
-    window.location.href = "http://localhost:8080/oauth2/authorization/naver";
+    window.location.href = `${API_URL}/oauth2/authorization/naver`;
 };
 
 export const getData = (): void => {
-    fetch("http://localhost:8080/test", {
+
+
+    fetch(`${API_URL}/main`, {
         method: 'GET',
         credentials: 'include',
     })
