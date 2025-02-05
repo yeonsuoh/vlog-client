@@ -1,5 +1,5 @@
 import {useState} from 'react';
-import {getData, onNaverLogin} from "../utils/utils.ts";
+import {onNaverLogin} from "../utils/utils.ts";
 import {API_URL} from "../config.ts";
 
 
@@ -39,8 +39,6 @@ const LoginModal = ({onClose}: { onClose: () => void}) => {
                 <button onClick={() => handleSignupOrLogin("login")}>이메일로 로그인/회원가입</button>
                 <p>소셜 계정으로 로그인</p>
                 <button onClick={onNaverLogin}>NAVER</button>
-                <br />
-                <button onClick={getData}>테스트</button>
                 <br />
                 <button onClick={onClose}>닫기</button> {/*닫기 버튼 추가 */}
             </div>

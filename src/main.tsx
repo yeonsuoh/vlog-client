@@ -4,7 +4,7 @@ import './index.css'
 import App from './App.tsx'
 
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
+  // <StrictMode> // 임시 주석 처리
     <App />
-  </StrictMode>,
+  // </StrictMode>,
 )

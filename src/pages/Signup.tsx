@@ -114,7 +114,10 @@ const Signup = () => {
                 return res.json();
             })
             .then((data) => {
-                const token = data.token;
+                console.log(data);
+
+                const token = data.accessToken;
+                console.log(token);
 
                 if (token) {
                     localStorage.setItem('accessToken', token);

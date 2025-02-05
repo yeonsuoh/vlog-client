@@ -4,16 +4,10 @@ const useAuth = () => {
     const [token, setToken] = useState<string | null>(null);
 
     useEffect(() => {
-        // `document.cookie`에서 Authorization 쿠키 찾기
-        const foundToken = document.cookie
-            .split("; ")
-            .find((row) => row.startsWith("Authorization="))
-            ?.split("=")[1];
-
-        if (foundToken) {
-            localStorage.setItem("accessToken", foundToken);
-            setToken(foundToken);
-            console.log("✅ 로그인 성공, 토큰 저장: ", foundToken);
+        const storedToken = localStorage.getItem("accessToken");
+        if (storedToken) {
+            setToken(storedToken);
+            console.log("✅ 로그인 성공, 토큰 저장: ", storedToken);
         } else {
             console.log("❌ 로그인되지 않음.");
         }
